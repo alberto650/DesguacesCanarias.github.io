@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario</title>
+    <style>
+        /* Estilos en línea para separar cada campo */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; }
+        div { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="file"], input[type="text"], input[type="number"], button { width: 100%; padding: 8px; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Desguaces Canarias .com</h1>
+    <h2>Subir Nueva Pieza</h2>
+
+    <!-- Campo de Imágenes -->
+    <div>
+        <label for="imagenes">Fotos de la Pieza:</label>
+        <input type="file" id="imagenes" multiple>
+    </div>
+
+    <!-- Campo de Precio -->
+    <div>
+        <label for="precio">Precio:</label>
+        <input type="number" id="precio" step="0.01">
+    </div>
+
+    <!-- Campo de Código Único con Botón de Generar -->
+    <div>
+        <label for="codigoUnico">Código Único:</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="codigoUnico" readonly>
+            <button type="button" onclick="generarCodigoUnico()">Generar Código</button>
+        </div>
+    </div>
+
+    <!-- Campo de Referencia -->
+    <div>
+        <label for="referencia">Referencia del Artículo:</label>
+        <input type="text" id="referencia">
+    </div>
+
+    <!-- Estado -->
+    <div>
+        <label for="estado">Estado:</label>
+        <input type="text" id="estado" value="Disponible">
+    </div>
+
+    <!-- Botón de Subir -->
+    <div>
+        <button id="botonSubir">Subir Pieza a Inventario</button>
+    </div>
+
+    <!-- Mensaje -->
+    <p id="mensaje"></p>
+
+    <hr>
+
+    <!-- Marcar como Vendido -->
+    <h2>Marcar Pieza como Vendida</h2>
+    <div>
+        <label for="codigoUnicoVenta">Código Único de la Pieza:</label>
+        <input type="text" id="codigoUnicoVenta">
+    </div>
+    <div>
+        <button id="botonVender">Marcar como Vendida</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
