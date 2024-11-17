@@ -1,75 +1,133 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario</title>
-    <style>
-        /* Estilos en línea para separar cada campo */
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; }
-        div { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="file"], input[type="text"], input[type="number"], button { width: 100%; padding: 8px; }
-        button { cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Desguaces Canarias .com</h1>
-    <h2>Subir Nueva Pieza</h2>
+    <div class="container">
+        <h1>Panel de Control de Inventario</h1>
 
-    <!-- Campo de Imágenes -->
-    <div>
-        <label for="imagenes">Fotos de la Pieza:</label>
-        <input type="file" id="imagenes" multiple>
-    </div>
+        <!-- Botón para abrir el modal de configuración -->
+        <button class="primary-button" onclick="abrirModal()">Configuración de API</button>
 
-    <!-- Campo de Precio -->
-    <div>
-        <label for="precio">Precio:</label>
-        <input type="number" id="precio" step="0.01">
-    </div>
-
-    <!-- Campo de Código Único con Botón de Generar -->
-    <div>
-        <label for="codigoUnico">Código Único:</label>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="codigoUnico" readonly>
-            <button type="button" onclick="generarCodigoUnico()">Generar Código</button>
+        <!-- Modal de configuración -->
+        <div id="modalConfiguracion" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="cerrarModal()">&times;</span>
+                <h3>Configuración de Airtable</h3>
+                <label for="apiKey">API Key:</label>
+                <input type="text" id="apiKey" class="input-field">
+                <label for="baseId">Base ID:</label>
+                <input type="text" id="baseId" class="input-field">
+                <button class="primary-button" onclick="guardarConfiguracion()">Guardar Configuración</button>
+            </div>
         </div>
+
+        <!-- Formulario para agregar un artículo nuevo -->
+        <section class="form-section">
+            <h3>Agregar Nuevo Artículo</h3>
+
+            <!-- Fotos -->
+            <label for="imagenes">Fotos del artículo:</label>
+            <input type="file" id="imagenes" class="input-field" multiple required><br>
+
+            <!-- Categorías -->
+            <label for="categoria">Categoría:</label>
+            <select id="categoria" class="input-field" required>
+                <option value="">Seleccionar Categoría</option>
+                <option value="Motor">Motor</option>
+                <option value="Transmisión">Transmisión</option>
+                <option value="Suspensión y Dirección">Suspensión y Dirección</option>
+                <option value="Sistema de Frenos">Sistema de Frenos</option>
+                <option value="Sistema de Escape">Sistema de Escape</option>
+                <option value="Electrónica y Electricidad">Electrónica y Electricidad</option>
+                <option value="Interior del Vehículo">Interior del Vehículo</option>
+                <option value="Exterior del Vehículo">Exterior del Vehículo</option>
+                <option value="Neumáticos y Llantas">Neumáticos y Llantas</option>
+                <option value="Sistema de Refrigeración">Sistema de Refrigeración</option>
+            </select><br>
+
+            <!-- Subcategorías -->
+            <label for="subcategoria">Subcategoría:</label>
+            <select id="subcategoria" class="input-field" disabled>
+                <option value="">Seleccionar Subcategoría</option>
+            </select><br>
+
+            <!-- Marcas -->
+            <label for="marca">Marca:</label>
+            <select id="marca" class="input-field" required>
+                <option value="">Seleccionar Marca</option>
+                <option value="Alfa Romeo">Alfa Romeo</option>
+<option value="Audi">Audi</option>
+<option value="BMW">BMW</option>
+<option value="Chevrolet">Chevrolet</option>
+<option value="Citroën">Citroën</option>
+<option value="Fiat">Fiat</option>
+<option value="Ford">Ford</option>
+<option value="Honda">Honda</option>
+<option value="Hyundai">Hyundai</option>
+<option value="Jeep">Jeep</option>
+<option value="Kia">Kia</option>
+<option value="Land Rover">Land Rover</option>
+<option value="Mazda">Mazda</option>
+<option value="Mercedes-Benz">Mercedes-Benz</option>
+<option value="Mitsubishi">Mitsubishi</option>
+<option value="Nissan">Nissan</option>
+<option value="Peugeot">Peugeot</option>
+<option value="Renault">Renault</option>
+<option value="Seat">Seat</option>
+<option value="Subaru">Subaru</option>
+<option value="Suzuki">Suzuki</option>
+<option value="Tesla">Tesla</option>
+<option value="Toyota">Toyota</option>
+<option value="Volkswagen">Volkswagen</option>
+
+                
+                <!-- Agrega más marcas según necesidad -->
+            </select><br>
+
+            <!-- Modelo -->
+            <label for="modelo">Modelo:</label>
+            <input type="text" id="modelo" class="input-field" placeholder="Ejemplo: Corolla" required><br>
+
+            <!-- Precio -->
+            <label for="precio">Precio (€):</label>
+            <input type="number" id="precio" class="input-field" step="0.01" required><br>
+
+            <!-- Descripción -->
+            <label for="descripcion">Descripción de la pieza:</label>
+            <textarea id="descripcion" class="input-field" placeholder="Descripción breve de la pieza..." rows="3" required></textarea><br>
+
+            <!-- Referencia -->
+            <label for="referencia">Referencia (opcional):</label>
+            <input type="text" id="referencia" class="input-field"><br>
+
+            <!-- Código único -->
+            <label for="codigoUnico">Código Único:</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="text" id="codigoUnico" class="input-field" readonly required>
+                <button type="button" class="secondary-button" onclick="generarCodigoUnico()">Generar Código</button>
+            </div><br>
+
+            <!-- Botón de Subir -->
+            <button id="botonSubir" class="primary-button">Subir Artículo</button>
+        </section>
+
+        <hr />
+
+        <!-- Formulario para marcar un artículo como vendido -->
+        <section class="form-section">
+            <h3>Marcar Artículo como Vendido</h3>
+            <label for="codigoUnicoVenta">Código Único del artículo:</label>
+            <input type="text" id="codigoUnicoVenta" class="input-field" required><br>
+            <button id="botonVender" class="primary-button">Marcar como Vendido</button>
+        </section>
+
+        <p id="mensaje" class="message"></p>
     </div>
-
-    <!-- Campo de Referencia -->
-    <div>
-        <label for="referencia">Referencia del Artículo:</label>
-        <input type="text" id="referencia">
-    </div>
-
-    <!-- Estado -->
-    <div>
-        <label for="estado">Estado:</label>
-        <input type="text" id="estado" value="Disponible">
-    </div>
-
-    <!-- Botón de Subir -->
-    <div>
-        <button id="botonSubir">Subir Pieza a Inventario</button>
-    </div>
-
-    <!-- Mensaje -->
-    <p id="mensaje"></p>
-
-    <hr>
-
-    <!-- Marcar como Vendido -->
-    <h2>Marcar Pieza como Vendida</h2>
-    <div>
-        <label for="codigoUnicoVenta">Código Único de la Pieza:</label>
-        <input type="text" id="codigoUnicoVenta">
-    </div>
-    <div>
-        <button id="botonVender">Marcar como Vendida</button>
-    </div>
-
     <script src="app.js"></script>
 </body>
 </html>
