@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de API</title>
+    <link rel="stylesheet" href="configuracion.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <button class="closeBtn" onclick="closeSidebar()">&times;</button>
+        <a href="index.html" onclick="closeSidebar()">Añadir Piezas</a>
+        <a href="sold.html" onclick="closeSidebar()">Marcar Vendido</a>
+        <a href="inventario.html" onclick="closeSidebar()">Inventario de Ventas</a>
+    </div>
+
+
+
+
+    <!-- Header -->
+    <header>
+        <button class="menuBtn" onclick="openSidebar()">☰</button>
+        <h1>Configuración de API</h1>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Configuración de API</h1>
+        <div>
+            <label for="api-key">API Key</label>
+            <input type="text" id="api-key" placeholder="Ingresa tu API Key">
+        </div>
+        <div>
+            <label for="base-id">Base ID</label>
+            <input type="text" id="base-id" placeholder="Ingresa tu Base ID">
+        </div>
+        <button class="primary-button" onclick="guardarConfiguracion()">Guardar Configuración</button>
+        
+        <button class="secondary-button" onclick="volver()">Volver al Panel Principal</button>
+    </div>
+
+    <script src="configuración.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcar Artículo como Vendido</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link rel="stylesheet" href="sold.css">
+</head>
+<body>
+    <!-- Botón para abrir el sidebar -->
+    <button class="openBtn" onclick="openSidebar()">☰</button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <button class="closeBtn" onclick="closeSidebar()">&times;</button>
+        <a href="index.html" onclick="closeSidebar()">Añadir Piezas</a>
+        <a href="inventario.html" onclick="closeSidebar()">Inventario de Ventas</a>
+        <a href="configuracion.html" onclick="closeSidebar()">Configuración de API</a>
+
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <section class="form-section">
+            <h3>Marcar Artículo como Vendido</h3>
+            <label for="codigoUnicoVenta">Código Único del artículo:</label>
+            <input type="text" id="codigoUnicoVenta" class="input-field" required><br>
+            <button id="botonVender" class="primary-button">Marcar como Vendido</button>
+        </section>
+    </div>
+
+    <script src="sold.js"></script>
+</body>
+</html>

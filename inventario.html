@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario de Ventas</title>
+    <link rel="stylesheet" href="inventario.css">
+</head>
+<body>
+    <!-- Botón para abrir el sidebar -->
+    <button class="openBtn" onclick="openSidebar()">☰ Menú</button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <button class="closeBtn" onclick="closeSidebar()">&times;</button>
+        <a href="index.html" onclick="closeSidebar()">Añadir piezas</a>
+        <a href="sold.html" onclick="closeSidebar()">Marcar Vendido</a>
+        <a href="configuracion.html" onclick="closeSidebar()">Configuración de API</a>
+
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <h1>Inventario de Ventas Online</h1>
+        <div id="sales-inventory" class="inventory-grid">
+            <!-- Aquí se cargarán los pedidos vendidos -->
+        </div>
+    </div>
+
+    <script src="inventario.js"></script>
+</body>
+</html>

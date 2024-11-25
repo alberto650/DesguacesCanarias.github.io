@@ -1,243 +1,255 @@
-// Función para abrir el modal de configuración
-function abrirModal() {
-    document.getElementById("modalConfiguracion").style.display = "block";
+// Función para abrir el Sidebar
+function openSidebar() {
+    document.getElementById("sidebar").style.left = "0";
+    document.querySelector(".main-content").classList.add("shifted");
 }
 
-// Función para cerrar el modal de configuración
-function cerrarModal() {
-    document.getElementById("modalConfiguracion").style.display = "none";
+// Función para cerrar el Sidebar
+function closeSidebar() {
+    document.getElementById("sidebar").style.left = "-250px";
+    document.querySelector(".main-content").classList.remove("shifted");
 }
 
-// Cerrar el modal si el usuario hace clic fuera de él
-window.onclick = function (event) {
-    const modal = document.getElementById("modalConfiguracion");
-    if (event.target === modal) {
-        modal.style.display = "none";
-    }
-};
-
-// Función para guardar la configuración de API Key y Base ID en el almacenamiento local
-function guardarConfiguracion() {
-    const apiKey = document.getElementById("apiKey").value;
-    const baseId = document.getElementById("baseId").value;
-
-    if (apiKey && baseId) {
-        localStorage.setItem("airtableApiKey", apiKey);
-        localStorage.setItem("airtableBaseId", baseId);
-        alert("Configuración guardada exitosamente.");
-        cerrarModal(); // Cerrar el modal después de guardar
+// Función para alternar la visibilidad de una sección
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = section.style.display === "none" || !section.style.display ? "block" : "none";
     } else {
-        alert("Por favor, ingresa la API Key y el Base ID.");
+        console.error(`Sección no encontrada: ${sectionId}`);
     }
 }
 
-// Función para cargar la configuración desde el almacenamiento local
-function cargarConfiguracion() {
-    const apiKey = localStorage.getItem("airtableApiKey");
-    const baseId = localStorage.getItem("airtableBaseId");
+// Función para actualizar las subcategorías basadas en la categoría seleccionada
+function updateSubcategories() {
+    const category = document.getElementById("part-category").value;
+    const subcategorySelect = document.getElementById("part-subcategory");
 
-    if (apiKey && baseId) {
-        document.getElementById("apiKey").value = apiKey;
-        document.getElementById("baseId").value = baseId;
-        return { apiKey, baseId };
-    } else {
-        return null;
-    }
-}
-
-// Función para inicializar la configuración al cargar la página
-function inicializar() {
-    const configuracion = cargarConfiguracion();
-    if (!configuracion) {
-        abrirModal(); // Mostrar el modal si no está configurada la API Key y Base ID
-    }
-}
-
-// Inicializar al cargar la página
-window.onload = inicializar;
-
-// Función para generar un código único
-async function generarCodigoUnico() {
-    const configuracion = cargarConfiguracion();
-    if (!configuracion) return;
-
-    const apiKey = configuracion.apiKey;
-    const baseId = configuracion.baseId;
-    const url = `https://api.airtable.com/v0/${baseId}/Inventario%20de%20piezas`;
-    const headers = {
-        Authorization: `Bearer ${apiKey}`
+    const subcategories = {
+        "Motor": ["Motor", "Bomba de Aceite", "Culata", "Alternador"],
+        "Transmisión": ["Caja de Cambios", "Embrague", "Frenos de Transmisión"],
+        "Suspensión y Dirección": ["Amortiguadores", "Barras Estabilizadoras", "Pivotes"],
+        "Sistema de Frenos": ["Disco de Freno", "Pastillas de Freno", "Tambores"],
+        "Sistema de Escape": ["Catalizador", "Silenciador", "Tubo de Escape"],
+        "Electrónica y Electricidad": ["Alternador", "Motor de Arranque", "Batería", "Faros"],
+        "Interior del Vehículo": ["Asientos", "Tablero de Instrumentos", "Volante"],
+        "Exterior del Vehículo": ["Espejos", "Puertas", "Faros", "Parachoques"],
+        "Neumáticos y Llantas": ["Neumático", "Rim de Llanta"],
+        "Sistema de Refrigeración": ["Radiador", "Ventilador", "Bomba de Agua"]
     };
 
-    let codigoUnico;
-    let codigoValido = false;
+    // Limpiar las subcategorías actuales
+    subcategorySelect.innerHTML = "<option value=''>Seleccione una Subcategoría</option>";
 
-    // Intentar hasta encontrar un código único
-    while (!codigoValido) {
-        codigoUnico = "Q" + Math.floor(1000 + Math.random() * 9000); // Generar código único aleatorio
-        const response = await fetch(`${url}?filterByFormula={Código Único}='${codigoUnico}'`, { headers });
-        const data = await response.json();
-
-        // Si el código no existe en Airtable, es válido
-        if (data.records.length === 0) {
-            codigoValido = true;
-        }
-    }
-
-    document.getElementById("codigoUnico").value = codigoUnico; // Mostrar el código en el campo
-}
-
-// Manejo de subcategorías dinámicas
-document.getElementById("categoria").addEventListener("change", function () {
-    const categorias = {
-        
-            "Motor": ["Motores completos", "Culatas", "Turbos", "Inyectores", "Bujías y calentadores"],
-            "Sistema de Transmisión": ["Cajas de cambio", "Embragues", "Ejes y transmisiones"],
-            "Suspensión y Dirección": ["Amortiguadores", "Barras estabilizadoras", "Manguetas", "Cremalleras de dirección"],
-            "Sistema de Frenos": ["Pastillas y discos", "Pinzas de freno", "Bombas de freno", "ABS y sensores"],
-            "Sistema de Escape": ["Catalizadores", "Filtros de partículas (FAP)", "Silenciadores"],
-            "Electrónica y Electricidad": ["Alternadores", "Motores de arranque", "Baterías", "Sensores (velocidad, temperatura, etc.)"],
-            "Interior del Vehículo": ["Volantes", "Asientos", "Consolas centrales", "Paneles de puertas"],
-            "Exterior del Vehículo": ["Paragolpes", "Faros y pilotos", "Retrovisores", "Puertas y capós"],
-            "Neumáticos y Llantas": ["Neumáticos", "Llantas"],
-            "Sistema de Refrigeración": ["Radiadores", "Ventiladores", "Bombas de agua"]
-        
-        
-    };
-    const subcategoria = document.getElementById("subcategoria");
-    const selectedCategoria = this.value;
-
-    subcategoria.innerHTML = "<option value=''>Seleccionar Subcategoría</option>";
-    subcategoria.disabled = true;
-
-    if (categorias[selectedCategoria]) {
-        categorias[selectedCategoria].forEach(subcat => {
+    if (subcategories[category]) {
+        subcategories[category].forEach(subcategory => {
             const option = document.createElement("option");
-            option.value = subcat;
-            option.textContent = subcat;
-            subcategoria.appendChild(option);
+            option.value = subcategory;
+            option.textContent = subcategory;
+            subcategorySelect.appendChild(option);
         });
-        subcategoria.disabled = false;
     }
-});
+}
 
-// Función para subir un artículo nuevo con fotos, precio y detalles a Airtable
-document.getElementById("botonSubir").addEventListener("click", async () => {
-    const configuracion = cargarConfiguracion();
-    if (!configuracion) return;
-
-    const apiKey = configuracion.apiKey;
-    const baseId = configuracion.baseId;
-    const url = `https://api.airtable.com/v0/${baseId}/Inventario%20de%20piezas`;
-    const headers = {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-    };
-
-    const imagenesInput = document.getElementById("imagenes").files;
-    const precio = parseFloat(document.getElementById("precio").value);
-    const categoria = document.getElementById("categoria").value;
-    const subcategoria = document.getElementById("subcategoria").value;
-    const codigoUnico = document.getElementById("codigoUnico").value;
-    const referencia = document.getElementById("referencia").value || "";
-    const descripcion = document.getElementById("descripcion").value;
-    const estado = "Disponible";
-
-    // Validar Categoría y Subcategoría
-    if (!categoria) {
-        alert("Por favor, selecciona una categoría.");
-        return;
+// Función para generar un código único aleatorio de 4 caracteres (solo números y letras mayúsculas)
+function generateUniqueCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+        code += characters.charAt(Math.floor(Math.random() * characters.length));
     }
-    if (!subcategoria) {
-        alert("Por favor, selecciona una subcategoría.");
-        return;
-    }
+    document.getElementById("part-unique-code").value = code;
+}
 
-    try {
-        const imagenesUrls = [];
-        for (const imagen of imagenesInput) {
-            const formData = new FormData();
-            formData.append("file", imagen);
-            formData.append("upload_preset", "desguacescanarias"); // Configura tu preset en Cloudinary
+// Función para subir imágenes a Cloudinary
+async function uploadImagesToCloudinary(imagesInput) {
+    const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dbthmtjui/image/upload";
+    const uploadPreset = "desguacescanarias";
+    const urls = []; // Array para guardar las URLs subidas
 
-            const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dbthmtjui/image/upload", {
+    for (const file of imagesInput) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+
+        try {
+            const response = await fetch(cloudinaryUrl, {
                 method: "POST",
                 body: formData
             });
 
-            const cloudinaryData = await cloudinaryResponse.json();
-            if (cloudinaryData.secure_url) {
-                imagenesUrls.push({ url: cloudinaryData.secure_url });
+            const data = await response.json();
+
+            if (data.secure_url) {
+                urls.push(data.secure_url); // Añadimos la URL de la imagen subida
             } else {
                 throw new Error("Error al subir una imagen a Cloudinary.");
             }
+        } catch (error) {
+            console.error("Error subiendo a Cloudinary:", error);
+            alert("Hubo un error al subir las imágenes.");
         }
-
-        const response = await fetch(url, {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({
-                fields: {
-                    Fotos: imagenesUrls,
-                    Precio: precio,
-                    Categoría: categoria, // Enviar Categoría
-                    Subcategoría: subcategoria, // Enviar Subcategoría
-                    "Código Único": codigoUnico,
-                    Referencia: referencia,
-                    Descripción: descripcion,
-                    Estado: estado
-                }
-            })
-        });
-
-        const airtableData = await response.json();
-        if (response.ok) {
-            document.getElementById("mensaje").innerText = "Registro creado exitosamente en Airtable.";
-        } else {
-            throw new Error(`Error al crear el registro en Airtable: ${JSON.stringify(airtableData)}`);
-        }
-    } catch (error) {
-        console.error("Error al procesar la solicitud:", error);
-        document.getElementById("mensaje").innerText = `Error: ${error.message}`;
     }
-});
 
-// Función para marcar un artículo como vendido
-document.getElementById("botonVender").addEventListener("click", async () => {
-    const configuracion = cargarConfiguracion();
-    if (!configuracion) return;
+    return urls; // Retornamos las URLs subidas
+}
 
-    const apiKey = configuracion.apiKey;
-    const baseId = configuracion.baseId;
-    const url = `https://api.airtable.com/v0/${baseId}/Inventario%20de%20piezas`;
+// Función para manejar solicitudes a la API de Airtable
+async function airtableRequest(endpoint, method = "GET", body = null) {
+    const apiKey = localStorage.getItem("airtableApiKey");
+    const baseId = localStorage.getItem("airtableBaseId");
 
-    const codigoUnico = document.getElementById("codigoUnicoVenta").value;
+    if (!apiKey || !baseId) {
+        alert("Configura la API Key y Base ID en la página de Configuración.");
+        throw new Error("Faltan credenciales de Airtable.");
+    }
+
+    const url = `https://api.airtable.com/v0/${baseId}/${endpoint}`;
     const headers = {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
     };
 
+    const options = { method, headers };
+
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error.message || "Error en la solicitud a Airtable.");
+    }
+
+    return response.json();
+}
+
+// Función para registrar un coche nuevo
+async function registerVehicle() {
+    const imagesInput = document.getElementById("vehicle-images").files;
+    const brand = document.getElementById("vehicle-make").value.trim();
+    const model = document.getElementById("vehicle-model").value.trim();
+    const year = document.getElementById("vehicle-year").value.trim();
+    const mileage = document.getElementById("vehicle-mileage").value.trim();
+
+    
+
+    // Validaciones
+    if (!brand || !model || !year) {
+        alert("Por favor, completa todos los campos obligatorios (Marca, Modelo, Año, Kilometraje).");
+        return;
+    }
+    if (!imagesInput.length) {
+        alert("Por favor, sube al menos una imagen del vehículo.");
+        return;
+    }
+
     try {
-        const response = await fetch(`${url}?filterByFormula={Código Único}='${codigoUnico}'`, { headers });
-        const data = await response.json();
-        if (data.records && data.records.length > 0) {
-            const recordId = data.records[0].id;
+        // Subimos las imágenes a Cloudinary
+        const uploadedImages = await uploadImagesToCloudinary(imagesInput);
 
-            const updateResponse = await fetch(`${url}/${recordId}`, {
-                method: "PATCH",
-                headers: headers,
-                body: JSON.stringify({ fields: { Estado: "Vendido" } })
-            });
+        if (uploadedImages.length === 0) {
+            alert("No se pudo subir ninguna imagen. Por favor, inténtalo de nuevo.");
+            return;
+        }
 
-            if (updateResponse.ok) {
-                document.getElementById("mensaje").innerText = "La pieza se ha marcado como vendida.";
-            } else {
-                throw new Error("Error al actualizar el estado de la pieza.");
-            }
+        // Preparar los datos para Airtable
+        const vehicleData = {
+            fields: {
+                Marca: brand,
+                Modelo: model,
+                Año: parseInt(year, 10),
+                Kilometraje: parseInt(mileage, 10),
+                Imágenes: uploadedImages.map(url => ({ url })), // Formato correcto para Airtable
+            },
+        };
+
+        // Enviar los datos a Airtable
+        const response = await airtableRequest("Vehículos", "POST", vehicleData);
+
+        // Verificar la respuesta
+        if (response.id) {
+            alert("Vehículo registrado con éxito.");
+            console.log("Vehículo registrado:", response);
+            // Limpiar el formulario
+            document.getElementById("vehicle-form").reset(); // Asegúrate de usar el id correcto aquí
         } else {
-            throw new Error("Pieza no encontrada con el código único proporcionado.");
+            console.error("Error inesperado al registrar el vehículo:", response);
+            alert("Hubo un problema al registrar el vehículo. Revisa los datos y vuelve a intentarlo.");
         }
     } catch (error) {
-        console.error("Error al marcar la pieza como vendida:", error);
-        document.getElementById("mensaje").innerText = `Error: ${error.message}`;
+        console.error("Error al registrar el vehículo:", error);
+        alert("Ocurrió un error al registrar el vehículo. Por favor, verifica los datos e inténtalo de nuevo.");
     }
+}
+
+// Función para registrar una pieza
+async function sendPartToAirtable() {
+    const imagesInput = document.getElementById("part-images").files;
+    const vehicleId = document.getElementById("vehicle-select").value;
+
+    if (!vehicleId) {
+        alert("Selecciona un vehículo.");
+        return;
+    }
+
+    try {
+        // Subimos las imágenes a Cloudinary
+        const uploadedImages = await uploadImagesToCloudinary(imagesInput);
+
+        // Preparamos los datos para Airtable
+        const partData = {
+            fields: {
+                Vehículo: [vehicleId],
+                Categoría: document.getElementById("part-category").value,
+                Subcategoría: document.getElementById("part-subcategory").value,
+                Código: document.getElementById("part-unique-code").value,
+                Precio: parseFloat(document.getElementById("part-price").value),
+                Descripción: document.getElementById("part-description").value,
+                Referencia: document.getElementById("part-reference").value,
+                Imágenes: uploadedImages.map(url => ({ url })), // Formato de Airtable para imágenes
+            }
+        };
+
+        // Enviamos los datos a Airtable
+        const response = await airtableRequest("Piezas", "POST", partData);
+
+        if (response.id) {
+            alert("Pieza registrada con éxito.");
+            console.log("Pieza añadida:", response);
+        } else {
+            alert("Hubo un problema al registrar la pieza.");
+        }
+    } catch (error) {
+        console.error("Error al registrar la pieza:", error);
+        alert("Ocurrió un error. Revisa los datos y vuelve a intentarlo.");
+    }
+}
+
+// Cargar los vehículos desde Airtable
+function loadVehicles() {
+    airtableRequest("Vehículos")
+        .then(data => {
+            const vehicleSelect = document.getElementById("vehicle-select");
+            vehicleSelect.innerHTML = "<option value=''>Seleccione un Vehículo</option>";
+
+            data.records.forEach(record => {
+                const option = document.createElement("option");
+                option.value = record.id;
+                option.textContent = `${record.fields.Marca} ${record.fields.Modelo} (${record.fields.Año})`;
+                vehicleSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error("Error al cargar vehículos:", error);
+            alert("No se pudo cargar la lista de vehículos.");
+        });
+}
+
+
+// Inicializar al cargar el DOM
+document.addEventListener("DOMContentLoaded", () => {
+    loadVehicles();
 });

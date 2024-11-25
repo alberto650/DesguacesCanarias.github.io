@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,37 +7,85 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Panel de Control de Inventario</h1>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <button class="closeBtn" onclick="closeSidebar()">&times;</button>
+        <a href="sold.html" onclick="closeSidebar()">Marcar Vendido</a>
+        <a href="inventario.html" onclick="closeSidebar()">Inventario de Ventas</a>
+                <a href="configuracion.html" onclick="closeSidebar()">Configuración de API</a>
+    </div>
 
-        <!-- Botón para abrir el modal de configuración -->
-        <button class="primary-button" onclick="abrirModal()">Configuración de API</button>
+    <!-- Main content -->
+    <div class="main-content">
+        <button class="openBtn" onclick="openSidebar()">☰</button>
 
-        <!-- Modal de configuración -->
-        <div id="modalConfiguracion" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="cerrarModal()">&times;</span>
-                <h3>Configuración de Airtable</h3>
-                <label for="apiKey">API Key:</label>
-                <input type="text" id="apiKey" class="input-field">
-                <label for="baseId">Base ID:</label>
-                <input type="text" id="baseId" class="input-field">
-                <button class="primary-button" onclick="guardarConfiguracion()">Guardar Configuración</button>
-            </div>
-        </div>
+        <h1>Gestión de Inventario de Vehículos y Piezas</h1>
 
-        <!-- Formulario para agregar un artículo nuevo -->
-        <section class="form-section">
-            <h3>Agregar Nuevo Artículo</h3>
+       <!-- Añadir Vehículo -->
+<div class="section" id="new-vehicles">
+    <h2>Añadir Vehículo</h2>
+    <button class="display-btn" onclick="toggleSection('vehicle-form')">Añadir Vehículo</button>
+    <div class="section-content" id="vehicle-form">
+        <form id="vehicle-form">
+            <!-- Campos del formulario del vehículo -->
+            <label for="vehicle-images">Fotos del Vehículo</label>
+            <input type="file" id="vehicle-images" multiple>
+            
+            <label for="vehicle-make">Marca</label>
+            <select id="vehicle-make">
+                <option value="Toyota">Toyota</option>
+                <option value="Ford">Ford</option>
+                <option value="BMW">BMW</option>
+            </select>
+            
+            <label for="vehicle-model">Modelo</label>
+            <input type="text" id="vehicle-model">
+            
+            <label for="vehicle-year">Año de Fabricaión:</label>
+            <input type="number" id="vehicle-year" min="1900" max="2099" required>
+            
+            <label for="vehicle-body-type">Tipo de carrocería</label>
+            <select id="vehicle-body-type">
+                <option value="Sedán">Sedán</option>
+                <option value="SUV">SUV</option>
+                <option value="Pick-up">Pick-up</option>
+            </select>
+            
+            <label for="vehicle-fuel">Combustible</label>
+            <select id="vehicle-fuel">
+                <option value="Diesel">Diesel</option>
+                <option value="Gasolina">Gasolina</option>
+                <option value="Eléctrico">Eléctrico</option>
+                <option value="Híbrido">Híbrido</option>
+            </select>
+            
+            <label for="vehicle-vin">VIN o Matrícula</label>
+            <input type="text" id="vehicle-vin">
+            
+            <label for="vehicle-mileage">Kilometraje</label>
+            <input type="number" id="vehicle-mileage">
+            
+            <button type="button" onclick="registerVehicle()">Registrar Vehículo</button>
+        </form>
+    </div>
+</div>
 
-            <!-- Fotos -->
-            <label for="imagenes">Fotos del artículo:</label>
-            <input type="file" id="imagenes" class="input-field" multiple required><br>
+<!-- Añadir Artículo -->
+<div class="section" id="new-parts">
+    <h2>Añadir Artículo</h2>
+    <button class="display-btn" onclick="toggleSection('part-form')">Añadir Artículo</button>
+    <div class="section-content" id="part-form">
+        <form id="part-form">
+            <label for="vehicle-select">Seleccionar Vehículo</label>
+            <select id="vehicle-select">
+                <!-- Opciones de vehículos añadidos dinámicamente -->
+            </select>
+            <label for="part-images">Imágenes de la Pieza</label>
+<input type="file" id="part-images" multiple>
 
-            <!-- Categorías -->
-            <label for="categoria">Categoría:</label>
-            <select id="categoria" class="input-field" required>
-                <option value="">Seleccionar Categoría</option>
+
+            <label for="part-category">Categoría</label>
+            <select id="part-category" onchange="updateSubcategories()">
                 <option value="Motor">Motor</option>
                 <option value="Transmisión">Transmisión</option>
                 <option value="Suspensión y Dirección">Suspensión y Dirección</option>
@@ -48,86 +96,36 @@
                 <option value="Exterior del Vehículo">Exterior del Vehículo</option>
                 <option value="Neumáticos y Llantas">Neumáticos y Llantas</option>
                 <option value="Sistema de Refrigeración">Sistema de Refrigeración</option>
-            </select><br>
+            </select>
+            
+            <label for="part-subcategory">Subcategoría</label>
+            <select id="part-subcategory">
+                <!-- Subcategorías se actualizarán dinámicamente -->
+            </select>
 
-            <!-- Subcategorías -->
-            <label for="subcategoria">Subcategoría:</label>
-            <select id="subcategoria" class="input-field" disabled>
-                <option value="">Seleccionar Subcategoría</option>
-            </select><br>
+            <label for="part-price">Precio</label>
+            <input type="number" id="part-price">
 
-            <!-- Marcas -->
-            <label for="marca">Marca:</label>
-            <select id="marca" class="input-field" required>
-                <option value="">Seleccionar Marca</option>
-                <option value="Alfa Romeo">Alfa Romeo</option>
-<option value="Audi">Audi</option>
-<option value="BMW">BMW</option>
-<option value="Chevrolet">Chevrolet</option>
-<option value="Citroën">Citroën</option>
-<option value="Fiat">Fiat</option>
-<option value="Ford">Ford</option>
-<option value="Honda">Honda</option>
-<option value="Hyundai">Hyundai</option>
-<option value="Jeep">Jeep</option>
-<option value="Kia">Kia</option>
-<option value="Land Rover">Land Rover</option>
-<option value="Mazda">Mazda</option>
-<option value="Mercedes-Benz">Mercedes-Benz</option>
-<option value="Mitsubishi">Mitsubishi</option>
-<option value="Nissan">Nissan</option>
-<option value="Peugeot">Peugeot</option>
-<option value="Renault">Renault</option>
-<option value="Seat">Seat</option>
-<option value="Subaru">Subaru</option>
-<option value="Suzuki">Suzuki</option>
-<option value="Tesla">Tesla</option>
-<option value="Toyota">Toyota</option>
-<option value="Volkswagen">Volkswagen</option>
+            <label for="part-description">Descripción</label>
+            <textarea id="part-description"></textarea>
 
-                
-                <!-- Agrega más marcas según necesidad -->
-            </select><br>
+            <label for="part-reference">Referencia</label>
+            <input type="text" id="part-reference">
 
-            <!-- Modelo -->
-            <label for="modelo">Modelo:</label>
-            <input type="text" id="modelo" class="input-field" placeholder="Ejemplo: Corolla" required><br>
+            <!-- Campo Código Único -->
+            <label for="part-unique-code">Código Único</label>
+            <div style="display: flex;">
+                <input type="text" id="part-unique-code" readonly>
+                <button type="button" onclick="generateUniqueCode()">Generar Código</button>
+            </div>
 
-            <!-- Precio -->
-            <label for="precio">Precio (€):</label>
-            <input type="number" id="precio" class="input-field" step="0.01" required><br>
-
-            <!-- Descripción -->
-            <label for="descripcion">Descripción de la pieza:</label>
-            <textarea id="descripcion" class="input-field" placeholder="Descripción breve de la pieza..." rows="3" required></textarea><br>
-
-            <!-- Referencia -->
-            <label for="referencia">Referencia (opcional):</label>
-            <input type="text" id="referencia" class="input-field"><br>
-
-            <!-- Código único -->
-            <label for="codigoUnico">Código Único:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="text" id="codigoUnico" class="input-field" readonly required>
-                <button type="button" class="secondary-button" onclick="generarCodigoUnico()">Generar Código</button>
-            </div><br>
-
-            <!-- Botón de Subir -->
-            <button id="botonSubir" class="primary-button">Subir Artículo</button>
-        </section>
-
-        <hr />
-
-        <!-- Formulario para marcar un artículo como vendido -->
-        <section class="form-section">
-            <h3>Marcar Artículo como Vendido</h3>
-            <label for="codigoUnicoVenta">Código Único del artículo:</label>
-            <input type="text" id="codigoUnicoVenta" class="input-field" required><br>
-            <button id="botonVender" class="primary-button">Marcar como Vendido</button>
-        </section>
-
-        <p id="mensaje" class="message"></p>
+            <button type="button" onclick="sendPartToAirtable()">Subir Artículo</button>
+        </form>
     </div>
+</div>
+
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
