@@ -67,6 +67,23 @@ h1, h2 {
     color: #333;
 }
 
+/* tomar fotos en el momento vista de imagenes en miniatura*/
+.image-preview-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.image-preview-grid img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+.image-preview-grid img.selected {
+    border-color: green;
+}
+
 /* Formulario y botones */
 input, select, textarea {
     width: 100%;

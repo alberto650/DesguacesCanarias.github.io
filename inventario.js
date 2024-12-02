@@ -15,22 +15,38 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Función para obtener los pedidos vendidos de Airtable
-    const fetchSoldItems = async () => {
-        try {
-            const response = await fetch(
-                `https://api.airtable.com/v0/${airtableBaseID}/${tableName}?filterByFormula={Estado}="Vendido"`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${airtableAPIKey}`,
-                    },
-                }
-            );
-            const data = await response.json();
-            displaySoldItems(data.records);
-        } catch (error) {
-            console.error("Error fetching sold items:", error);
+    let previousItemCount = 0; // Para rastrear la cantidad previa de artículos
+
+const fetchSoldItems = async () => {
+    try {
+        const response = await fetch(
+            `https://api.airtable.com/v0/${airtableBaseID}/${tableName}?filterByFormula={Estado}="Vendido"`,
+            {
+                headers: {
+                    Authorization: `Bearer ${airtableAPIKey}`,
+                },
+            }
+        );
+        const data = await response.json();
+
+        // Verificar si hay nuevos artículos
+        const newItemCount = data.records.length;
+        if (newItemCount > previousItemCount) {
+            // Reproducir sonido si hay nuevos artículos
+            const notificationSound = document.getElementById("notificationSound");
+            notificationSound.play();
         }
-    };
+
+        // Actualizar el contador previo
+        previousItemCount = newItemCount;
+
+        // Mostrar los artículos en el DOM
+        displaySoldItems(data.records);
+    } catch (error) {
+        console.error("Error fetching sold items:", error);
+    }
+};
+
 
     // Función para mostrar los pedidos vendidos en el DOM
     const displaySoldItems = (items) => {

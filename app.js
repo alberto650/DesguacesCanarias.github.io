@@ -12,13 +12,14 @@ function closeSidebar() {
 
 // Función para alternar la visibilidad de una sección
 function toggleSection(sectionId) {
-    const section = document.getElementById(sectionId);
+    const section = document.getElementById(sectionId); // Se debe usar el ID del contenedor
     if (section) {
         section.style.display = section.style.display === "none" || !section.style.display ? "block" : "none";
     } else {
         console.error(`Sección no encontrada: ${sectionId}`);
     }
 }
+
 
 // Función para actualizar las subcategorías basadas en la categoría seleccionada
 function updateSubcategories() {
@@ -61,8 +62,8 @@ function generateUniqueCode() {
     document.getElementById("part-unique-code").value = code;
 }
 
-// Función para subir imágenes a Cloudinary
-async function uploadImagesToCloudinary(imagesInput) {
+// Función para subir imágenes a Cloudinary con prefijo distintivo
+async function uploadImagesToCloudinary(imagesInput, prefix = "") {
     const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dbthmtjui/image/upload";
     const uploadPreset = "desguacescanarias";
     const urls = []; // Array para guardar las URLs subidas
@@ -72,10 +73,14 @@ async function uploadImagesToCloudinary(imagesInput) {
         formData.append("file", file);
         formData.append("upload_preset", uploadPreset);
 
+        // Agregar prefijo como parte del nombre o metadata de la imagen
+        const filenameWithPrefix = `${prefix}_${file.name}`;
+        formData.append("public_id", filenameWithPrefix); // Esto establece el nombre del archivo en Cloudinary
+
         try {
             const response = await fetch(cloudinaryUrl, {
                 method: "POST",
-                body: formData
+                body: formData,
             });
 
             const data = await response.json();
@@ -93,6 +98,7 @@ async function uploadImagesToCloudinary(imagesInput) {
 
     return urls; // Retornamos las URLs subidas
 }
+
 
 // Función para manejar solicitudes a la API de Airtable
 async function airtableRequest(endpoint, method = "GET", body = null) {
@@ -134,8 +140,6 @@ async function registerVehicle() {
     const year = document.getElementById("vehicle-year").value.trim();
     const mileage = document.getElementById("vehicle-mileage").value.trim();
 
-    
-
     // Validaciones
     if (!brand || !model || !year) {
         alert("Por favor, completa todos los campos obligatorios (Marca, Modelo, Año, Kilometraje).");
@@ -146,58 +150,91 @@ async function registerVehicle() {
         return;
     }
 
+    // Crear vista previa y seleccionar imagen principal
+    let mainImageIndex = 0; // Por defecto, la primera imagen es la principal
+    const images = Array.from(imagesInput);
+    const previewContainer = document.getElementById("image-preview");
+    previewContainer.innerHTML = "";
+
+    images.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = document.createElement("img");
+            img.src = reader.result;
+            img.dataset.index = index;
+
+            if (index === mainImageIndex) {
+                img.classList.add("selected");
+            }
+
+            img.addEventListener("click", () => {
+                document.querySelectorAll("#image-preview img").forEach(el => el.classList.remove("selected"));
+                img.classList.add("selected");
+                mainImageIndex = index;
+            });
+
+            previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    });
+
     try {
-        // Subimos las imágenes a Cloudinary
-        const uploadedImages = await uploadImagesToCloudinary(imagesInput);
+        const prefix = `vehicle_${brand}_${model}_${year}`;
+        const uploadedImages = await uploadImagesToCloudinary(images, prefix);
 
         if (uploadedImages.length === 0) {
             alert("No se pudo subir ninguna imagen. Por favor, inténtalo de nuevo.");
             return;
         }
 
-        // Preparar los datos para Airtable
+        const mainImageUrl = uploadedImages[mainImageIndex];
+
+        // Datos para Airtable
         const vehicleData = {
             fields: {
                 Marca: brand,
                 Modelo: model,
                 Año: parseInt(year, 10),
                 Kilometraje: parseInt(mileage, 10),
-                Imágenes: uploadedImages.map(url => ({ url })), // Formato correcto para Airtable
+                "Imagen Principal": mainImageUrl,
+                Imágenes: uploadedImages.map(url => ({ url })),
             },
         };
 
-        // Enviar los datos a Airtable
         const response = await airtableRequest("Vehículos", "POST", vehicleData);
 
-        // Verificar la respuesta
         if (response.id) {
             alert("Vehículo registrado con éxito.");
-            console.log("Vehículo registrado:", response);
-            // Limpiar el formulario
-            document.getElementById("vehicle-form").reset(); // Asegúrate de usar el id correcto aquí
+            document.getElementById("vehicle-form").reset();
         } else {
-            console.error("Error inesperado al registrar el vehículo:", response);
-            alert("Hubo un problema al registrar el vehículo. Revisa los datos y vuelve a intentarlo.");
+            console.error("Error en la respuesta de Airtable:", response);
+            alert("Hubo un problema al registrar el vehículo.");
         }
     } catch (error) {
-        console.error("Error al registrar el vehículo:", error);
-        alert("Ocurrió un error al registrar el vehículo. Por favor, verifica los datos e inténtalo de nuevo.");
+        console.error("Error al registrar el vehículo:", error.message, error);
+        alert("Ocurrió un error al registrar el vehículo. Revisa los detalles en la consola.");
     }
 }
+
 
 // Función para registrar una pieza
 async function sendPartToAirtable() {
     const imagesInput = document.getElementById("part-images").files;
     const vehicleId = document.getElementById("vehicle-select").value;
-
-    if (!vehicleId) {
-        alert("Selecciona un vehículo.");
+    
+ if (!vehicleId || !imagesInput.length) {
+        alert("Selecciona un vehículo y sube al menos una imagen de la pieza.");
         return;
     }
 
     try {
-        // Subimos las imágenes a Cloudinary
-        const uploadedImages = await uploadImagesToCloudinary(imagesInput);
+        const prefix = `part_vehicle_${vehicleId}`;
+        const uploadedImages = await uploadImagesToCloudinary(imagesInput, prefix);
+
+        if (uploadedImages.length === 0) {
+            alert("No se pudo subir ninguna imagen. Por favor, inténtalo de nuevo.");
+            return;
+        }
 
         // Preparamos los datos para Airtable
         const partData = {

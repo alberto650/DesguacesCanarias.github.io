@@ -24,18 +24,44 @@
        <!-- Añadir Vehículo -->
 <div class="section" id="new-vehicles">
     <h2>Añadir Vehículo</h2>
-    <button class="display-btn" onclick="toggleSection('vehicle-form')">Añadir Vehículo</button>
-    <div class="section-content" id="vehicle-form">
+    <button class="display-btn" onclick="toggleSection('vehicle-section')">Añadir Vehículo</button>
+    <div class="section-content" id="vehicle-section">
         <form id="vehicle-form">
             <!-- Campos del formulario del vehículo -->
-            <label for="vehicle-images">Fotos del Vehículo</label>
-            <input type="file" id="vehicle-images" multiple>
-            
+            <label for="vehicle-images">Subir o tomar fotos del vehículo:</label>
+            <input type="file" id="vehicle-images" name="vehicle-images" accept="image/*" multiple capture="environment">
+                    
+            <div id="preview-container">
+                <p>Vista previa de las imágenes seleccionadas:</p>
+                <div id="image-preview" class="image-preview-grid"></div>
+            </div>
+
             <label for="vehicle-make">Marca</label>
             <select id="vehicle-make">
-                <option value="Toyota">Toyota</option>
-                <option value="Ford">Ford</option>
+                <option value="Alfa Romeo">Alfa Romeo</option>
+                <option value="Audi">Audi</option>
                 <option value="BMW">BMW</option>
+                <option value="Chevrolet">Chevrolet</option>
+                <option value="Citroën">Citroën</option>
+                <option value="Fiat">Fiat</option>
+                <option value="Ford">Ford</option>
+                <option value="Honda">Honda</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Jeep">Jeep</option>
+                <option value="Kia">Kia</option>
+                <option value="Land Rover">Land Rover</option>
+                <option value="Mazda">Mazda</option>
+                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                <option value="Mitsubishi">Mitsubishi</option>
+                <option value="Nissan">Nissan</option>
+                <option value="Peugeot">Peugeot</option>
+                <option value="Renault">Renault</option>
+                <option value="Seat">Seat</option>
+                <option value="Subaru">Subaru</option>
+                <option value="Suzuki">Suzuki</option>
+                <option value="Tesla">Tesla</option>
+                <option value="Toyota">Toyota</option>
+                <option value="Volkswagen">Volkswagen</option>
             </select>
             
             <label for="vehicle-model">Modelo</label>
@@ -46,9 +72,9 @@
             
             <label for="vehicle-body-type">Tipo de carrocería</label>
             <select id="vehicle-body-type">
-                <option value="Sedán">Sedán</option>
-                <option value="SUV">SUV</option>
-                <option value="Pick-up">Pick-up</option>
+                <option value="5puertas">5 puertas</option>
+                <option value="3puertas">3 puertas</option>
+                <option value="4x4">4x4</option>
             </select>
             
             <label for="vehicle-fuel">Combustible</label>
@@ -63,7 +89,7 @@
             <input type="text" id="vehicle-vin">
             
             <label for="vehicle-mileage">Kilometraje</label>
-            <input type="number" id="vehicle-mileage">
+            <input type="number" id="vehicle-mileage" name="vehicle-mileage" required>
             
             <button type="button" onclick="registerVehicle()">Registrar Vehículo</button>
         </form>
@@ -81,7 +107,7 @@
                 <!-- Opciones de vehículos añadidos dinámicamente -->
             </select>
             <label for="part-images">Imágenes de la Pieza</label>
-<input type="file" id="part-images" multiple>
+            <input type="file" id="part-images" name="part-images" multiple required>
 
 
             <label for="part-category">Categoría</label>
@@ -104,18 +130,18 @@
             </select>
 
             <label for="part-price">Precio</label>
-            <input type="number" id="part-price">
+            <input type="text" id="part-price" name="part-price" required>
 
             <label for="part-description">Descripción</label>
-            <textarea id="part-description"></textarea>
+            <textarea id="part-description" name="part-description" required></textarea>
 
             <label for="part-reference">Referencia</label>
-            <input type="text" id="part-reference">
+            <input type="text" id="part-reference" name="part-reference">
 
             <!-- Campo Código Único -->
             <label for="part-unique-code">Código Único</label>
             <div style="display: flex;">
-                <input type="text" id="part-unique-code" readonly>
+                <input type="text" id="part-unique-code" name="part-unique-code"readonly>
                 <button type="button" onclick="generateUniqueCode()">Generar Código</button>
             </div>
 
