@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const airtableAPIKey = "tu-api-key"; // Cambia por tu API Key
-    const airtableBaseID = "tu-base-id"; // Cambia por tu Base ID
-    const tableName = "nombre-de-tu-tabla"; // Cambia por el nombre de la tabla
+    const inventoryList = document.getElementById("inventory-list");
+    const notificationSound = document.getElementById("notificationSound");
 
-    const inventoryContainer = document.getElementById("sales-inventory");
+    let previousItemCount = 0;
 
     // Sidebar - Funciones para abrir y cerrar
     window.openSidebar = () => {
@@ -14,138 +13,122 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("sidebar").style.width = "0";
     };
 
-    // Función para obtener los pedidos vendidos de Airtable
-    let previousItemCount = 0; // Para rastrear la cantidad previa de artículos
+    // Función para obtener las piezas vendidas o reservadas
+    const fetchSoldOrReservedItems = async () => {
+        try {
+            const response = await airtableRequest(
+                `Piezas?filterByFormula=OR({Estado}="Vendido", {Estado}="Reservado")`
+            );
 
-const fetchSoldItems = async () => {
-    try {
-        const response = await fetch(
-            `https://api.airtable.com/v0/${airtableBaseID}/${tableName}?filterByFormula={Estado}="Vendido"`,
-            {
-                headers: {
-                    Authorization: `Bearer ${airtableAPIKey}`,
-                },
+            const items = response.records || [];
+            
+            // Reproducir notificación si hay más piezas que antes
+            if (items.length > previousItemCount) {
+                notificationSound.play();
             }
-        );
-        const data = await response.json();
 
-        // Verificar si hay nuevos artículos
-        const newItemCount = data.records.length;
-        if (newItemCount > previousItemCount) {
-            // Reproducir sonido si hay nuevos artículos
-            const notificationSound = document.getElementById("notificationSound");
-            notificationSound.play();
+            previousItemCount = items.length;
+            displayInventoryItems(items);
+        } catch (error) {
+            console.error("Error al obtener piezas:", error);
         }
+    };
 
-        // Actualizar el contador previo
-        previousItemCount = newItemCount;
-
-        // Mostrar los artículos en el DOM
-        displaySoldItems(data.records);
-    } catch (error) {
-        console.error("Error fetching sold items:", error);
-    }
-};
-
-
-    // Función para mostrar los pedidos vendidos en el DOM
-    const displaySoldItems = (items) => {
-        inventoryContainer.innerHTML = ""; // Limpia el contenedor antes de mostrar los datos
+    // Función para mostrar las piezas en formato lista
+    const displayInventoryItems = (items) => {
+        inventoryList.innerHTML = ""; // Limpiar contenedor
 
         items.forEach((item) => {
             const { fields } = item;
+
             const inventoryItem = document.createElement("div");
             inventoryItem.className = "inventory-item";
 
             inventoryItem.innerHTML = `
-                <img src="${fields.Foto[0].url}" alt="Imagen de la pieza">
-                <div class="item-description">${fields.Descripción}</div>
-                <div class="item-price">€${fields.Precio}</div>
-                <div class="item-code">Código único: ${fields["Código Único"]}</div>
-                <button class="notify-button" data-id="${item.id}">Llamar al Repartidor</button>
+                <div class="item-header">
+                    <h2>${fields.Título || "Sin nombre"}</h2>
+                </div>
+                <div class="item-body">
+                    <p><strong>Descripción:</strong> ${fields.Descripción || "Sin descripción"}</p>
+                    <p><strong>Precio:</strong> €${fields.Precio || "0.00"}</p>
+                    <p><strong>Código único:</strong> ${fields.Código || "Sin código"}</p>
+                    <div class="item-images">
+                        ${fields.Imágenes
+                            ?.map((img) => `<img src="${img.url}" alt="Imagen de la pieza">`)
+                            .join("") || "Sin imágenes"}
+                    </div>
+                </div>
+                <button class="courier-button" data-id="${item.id}">Repartidor</button>
             `;
 
-            inventoryContainer.appendChild(inventoryItem);
+            inventoryList.appendChild(inventoryItem);
         });
 
-        // Agregar eventos a los botones
-        const notifyButtons = document.querySelectorAll(".notify-button");
-        notifyButtons.forEach((button) => {
+        // Vincular funcionalidad de notificar repartidor
+        const courierButtons = document.querySelectorAll(".courier-button");
+        courierButtons.forEach((button) => {
             button.addEventListener("click", () => notifyCourier(button.dataset.id));
         });
     };
 
-    // Función para marcar como listo para el repartidor
+    // Función para notificar al repartidor
     const notifyCourier = async (recordId) => {
         try {
-            const response = await fetch(
-                `https://api.airtable.com/v0/${airtableBaseID}/${tableName}/${recordId}`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        Authorization: `Bearer ${airtableAPIKey}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        fields: {
-                            "Estado": "Listo para Repartidor",
-                        },
-                    }),
-                }
-            );
+            const courierApiUrl = "https://api.correos.es/notify"; // URL de la API de Correos
+            const payload = {
+                recordId, // Identificador de la pieza
+                message: "Nueva pieza lista para envío.",
+            };
+
+            const response = await fetch(courierApiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
 
             if (response.ok) {
-                alert("El repartidor ha sido notificado.");
-                fetchSoldItems(); // Refrescar la lista
+                alert("Notificación enviada al repartidor.");
             } else {
                 alert("Error al notificar al repartidor.");
             }
         } catch (error) {
-            console.error("Error notificando al repartidor:", error);
+            console.error("Error al conectar con Correos:", error);
+            alert("Hubo un problema al notificar al repartidor.");
         }
     };
 
-    // Inicializa la carga de los pedidos vendidos
-    fetchSoldItems();
-});
-function airtableRequest(endpoint, method = 'GET', body = null) {
-    const apiKey = localStorage.getItem('airtableApiKey');
-    const baseId = localStorage.getItem('airtableBaseId');
+    // Función para solicitudes a Airtable
+    async function airtableRequest(endpoint, method = "GET", body = null) {
+        const apiKey = localStorage.getItem("airtableApiKey");
+        const baseId = localStorage.getItem("airtableBaseId");
 
-    if (!apiKey || !baseId) {
-        alert('Configura la API Key y Base ID en la página de Configuración.');
-        return Promise.reject('Faltan credenciales de Airtable');
+        if (!apiKey || !baseId) {
+            alert("Configura la API Key y Base ID en la página de Configuración.");
+            throw new Error("Faltan credenciales de Airtable.");
+        }
+
+        const url = `https://api.airtable.com/v0/${baseId}/${endpoint}`;
+        const headers = {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+        };
+
+        const options = { method, headers };
+        if (body) options.body = JSON.stringify(body);
+
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error.message || "Error en la solicitud a Airtable.");
+        }
+
+        return response.json();
     }
 
-    const url = `https://api.airtable.com/v0/${baseId}/${endpoint}`;
-    const headers = {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-    };
-
-    return fetch(url, {
-        method: method,
-        headers: headers,
-        body: body ? JSON.stringify(body) : null,
-    })
-        .then(response => response.json())
-        .catch(error => console.error('Error en la conexión con Airtable:', error));
-}
-function loadSoldParts() {
-    airtableRequest(`Piezas?filterByFormula={Estado}="Vendido"`)
-        .then(data => {
-            const table = document.getElementById('sold-parts-table');
-            table.innerHTML = ''; // Limpiamos la tabla
-
-            data.records.forEach(record => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${record.fields.Código}</td>
-                    <td>${record.fields.Descripción}</td>
-                    <td>${record.fields.Precio}</td>
-                    <td>${record.fields.Vehículo ? record.fields.Vehículo[0] : ''}</td>
-                `;
-                table.appendChild(row);
-            });
-        });
-}
+    // Inicializar la carga de los artículos
+    fetchSoldOrReservedItems();
+    setInterval(fetchSoldOrReservedItems, 30000); // Actualización automática cada 30 segundos
+});

@@ -244,8 +244,10 @@ async function sendPartToAirtable() {
                 Subcategoría: document.getElementById("part-subcategory").value,
                 Código: document.getElementById("part-unique-code").value,
                 Precio: parseFloat(document.getElementById("part-price").value),
+                Título: document.getElementById("part-nombre").value,
                 Descripción: document.getElementById("part-description").value,
                 Referencia: document.getElementById("part-reference").value,
+                Estado: "Disponible", // Estado inicial
                 Imágenes: uploadedImages.map(url => ({ url })), // Formato de Airtable para imágenes
             }
         };

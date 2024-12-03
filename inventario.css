@@ -25,49 +25,91 @@ h1 {
     margin-bottom: 20px;
 }
 
-.inventory-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+/* Estilos del listado de inventario */
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
 }
 
 .inventory-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 10px;
+    padding: 10px 15px;
     background-color: #fafafa;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
 }
 
-.inventory-item img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 10px;
+.item-details {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 80%;
 }
 
-.item-description {
-    font-size: 16px;
+/* Establecer un tamaño máximo para la imagen y forzar el ajuste al contenedor */
+.item-icon img {
+    width: 60px;              /* Tamaño máximo de la imagen */
+    height: 60px;             /* Tamaño máximo de la imagen */
+    object-fit: cover;        /* Asegura que la imagen no se deforme */
+    border-radius: 4px;       /* Bordes redondeados */
+    border: 1px solid #ddd;   /* Borde ligero */
+    display: block;           /* Elimina posibles márgenes extra */
+    max-width: 100%;          /* Asegura que la imagen se ajuste al contenedor */
+    max-height: 100%;         /* Asegura que la imagen no se estire más de lo que debe */
+}
+
+/* Asegura que el contenedor tenga tamaño adecuado */
+.item-icon {
+    width: 60px;              /* El contenedor tiene el mismo tamaño que la imagen */
+    height: 60px;             /* El contenedor tiene el mismo tamaño que la imagen */
+    display: flex;
+    justify-content: center;
+    align-items: center;      /* Centra la imagen en el contenedor */
+    overflow: hidden;         /* Evita que la imagen se desborde */
+}
+
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.item-info p {
+    margin: 0;
     color: #555;
-    margin-bottom: 10px;
 }
 
-.item-price {
-    font-size: 18px;
+.item-info .item-name {
     font-weight: bold;
+    font-size: 18px;
     color: #333;
-    margin-bottom: 10px;
 }
 
-.item-code {
+.item-info .item-description {
     font-size: 14px;
-    color: #777;
-    margin-bottom: 15px;
+    color: #666;
 }
 
-.notify-button {
-    background-color: #007bff;
+.item-info .item-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.item-info .item-code {
+    font-size: 12px;
+    color: #777;
+}
+
+/* Botón Repartidor */
+.courier-button {
+    background-color: #28a745;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -77,8 +119,8 @@ h1 {
     transition: background-color 0.3s ease;
 }
 
-.notify-button:hover {
-    background-color: #0056b3;
+.courier-button:hover {
+    background-color: #218838;
 }
 
 /* Estilos del sidebar */
